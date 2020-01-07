@@ -1,0 +1,73 @@
+package com.bela.pregnancycare.Repository;
+
+import com.bela.pregnancycare.Model.FertilityCentre;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+/*
+* class to call API  to get Fertility center
+* Note - not in use
+* */
+public class FertilityCenterAPI {
+    private static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?";
+
+    //method to form url and get result for park within 5km
+    public static String getFertilityCenterInfo(String latitude, String longitude, String PROXIMITY_RADIUS, String nearbyPlace) {
+        final String methodPath = "location=" + latitude + "," + longitude + "&radius=" + PROXIMITY_RADIUS + "&type=" + nearbyPlace + "&key=" + RestClientAddress.APIKEY;
+        //initialise
+        URL url = null;
+        HttpURLConnection conn = null;
+        String textResult = "";
+        //Making HTTP request
+        try {
+            url = new URL(BASE_URL + methodPath);
+            //open the connection
+            conn = (HttpURLConnection) url.openConnection();
+            //set the timeout
+            conn.setReadTimeout(10000);
+            conn.setConnectTimeout(15000);
+            //set the connection method to GET
+            conn.setRequestMethod("GET");
+            //add http headers to set your response type to json
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("Accept", "application/json");
+            //Read the response
+            Scanner inStream = new Scanner(conn.getInputStream());
+
+            while (inStream.hasNextLine()) {
+                textResult += inStream.nextLine();
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            conn.disconnect();
+        }
+        return textResult;
+    }
+//Not in use
+    public static FertilityCentre[] getFertilityCenter(String result) {
+        double lat = 0;
+        double lon=0;
+        String name="";
+        String address="";
+
+        FertilityCentre[] fertilityCentres=null;
+
+        try{
+            JSONObject jsonObject = new JSONObject(result);
+            JSONArray jsonlinkArray = jsonObject.getJSONArray("results");
+            fertilityCentres = new FertilityCentre[jsonlinkArray.length()];
+        }
+        catch(Exception e){
+            e.printStackTrace();
+
+        }
+
+        return fertilityCentres;
+    }
+}
